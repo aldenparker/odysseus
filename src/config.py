@@ -14,10 +14,16 @@ from pydantic import Field, field_validator
 # files) so they stay easy to integrate with upstream changes.
 IS_WINDOWS = os.name == "nt"
 
+# Project root is __file__-relative; data dir is env-overridable (ODYSSEUS_DATA_DIR)
+# so the app can run from a read-only install (Nix store, immutable container).
+_PROJECT_ROOT = Path(__file__).parent.parent
+_DEFAULT_DATA_DIR = Path(os.environ.get("ODYSSEUS_DATA_DIR", str(_PROJECT_ROOT / "data")))
+
+
 class DataConfig(BaseSettings):
     """Configuration for data storage and file handling."""
     # Base directory
-    base_dir: Path = Field(default=Path(__file__).parent.parent, description="Base directory for the application")
+    base_dir: Path = Field(default=_PROJECT_ROOT, description="Base directory for the application")
     
     # Data paths
     data_dir: Path = Field(default=Path("data"), description="Main data directory")
@@ -136,10 +142,10 @@ class AppConfig(BaseSettings):
         if isinstance(v, dict) and "base_dir" in v:
             base_dir = v["base_dir"]
         else:
-            base_dir = Path(__file__).parent.parent
-        
-        # Convert string paths to Path objects relative to base_dir
-        data_dir = base_dir / "data"
+            base_dir = _PROJECT_ROOT
+
+        # Data dir is env-overridable (ODYSSEUS_DATA_DIR); fall back to base_dir/data.
+        data_dir = _DEFAULT_DATA_DIR
         
         # Get values from the input dict or use defaults
         max_upload_size = v.get("max_upload_size", 10 * 1024 * 1024) if isinstance(v, dict) else 10 * 1024 * 1024

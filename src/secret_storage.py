@@ -24,11 +24,12 @@ from pathlib import Path
 
 from cryptography.fernet import Fernet, InvalidToken
 
+from core.constants import DATA_DIR as _DATA_DIR  # env-overridable via ODYSSEUS_DATA_DIR
 from core.platform_compat import safe_chmod
 
 logger = logging.getLogger(__name__)
 
-_KEY_PATH = Path(__file__).resolve().parent.parent / "data" / ".app_key"
+_KEY_PATH = Path(_DATA_DIR) / ".app_key"
 _PREFIX = "enc:"
 _fernet: Fernet | None = None
 

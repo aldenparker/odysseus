@@ -40,9 +40,9 @@ def get_rag_manager():
 
     try:
         from src.rag_vector import VectorRAG
+        from core.constants import DATA_DIR  # env-overridable via ODYSSEUS_DATA_DIR
 
-        base_dir = Path(__file__).parent.parent
-        persist_dir = os.path.join(base_dir, "data", "rag")
+        persist_dir = os.path.join(DATA_DIR, "rag")
 
         rag_instance = VectorRAG(persist_directory=persist_dir)
         if not rag_instance.healthy:

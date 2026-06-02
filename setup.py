@@ -10,7 +10,12 @@ import shutil
 import sys
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR = os.path.join(BASE_DIR, "data")
+# DATA_DIR / LOG_DIR are overridable via env so setup can run against a
+# mutable state dir while the install itself stays read-only (Nix store,
+# immutable containers). Defaults are cwd-relative so the existing
+# "create data/ next to me" UX still works.
+DATA_DIR = os.environ.get("ODYSSEUS_DATA_DIR", os.path.abspath("data"))
+LOG_DIR = os.environ.get("ODYSSEUS_LOG_DIR", os.path.abspath("logs"))
 
 DIRS = [
     DATA_DIR,
@@ -23,7 +28,7 @@ DIRS = [
     os.path.join(DATA_DIR, "chroma"),
     os.path.join(DATA_DIR, "rag"),
     os.path.join(DATA_DIR, "memory_vectors"),
-    os.path.join(BASE_DIR, "logs"),
+    LOG_DIR,
 ]
 
 
@@ -84,13 +89,17 @@ def create_env():
     if os.path.exists(env_path):
         print("  [skip] .env already exists")
         return
-    if os.path.exists(example_path):
-        import shutil
+    if not os.path.exists(example_path):
+        print("  [warn] .env.example not found — create .env manually")
+        return
+    try:
         shutil.copy2(example_path, env_path)
         print("  [ok] .env created from .env.example")
         print("        ** Edit .env with your LLM host and API keys **")
-    else:
-        print("  [warn] .env.example not found — create .env manually")
+    except OSError as e:
+        # Read-only install (e.g. Nix store): the environment file lives
+        # outside the install dir and is provided by the process manager.
+        print(f"  [skip] .env: install dir not writable ({e.strerror})")
 
 
 def check_deps():

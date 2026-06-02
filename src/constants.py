@@ -4,10 +4,16 @@ import os
 
 APP_VERSION = "1.0.0"
 
-# Base paths
+# Base paths. BASE_DIR / STATIC_DIR point at the install tree (the code
+# directory), so they stay __file__-relative — fine for a read-only install
+# because they're only read, never written.
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/"
 STATIC_DIR = os.path.join(BASE_DIR, "static")
-DATA_DIR = os.path.join(BASE_DIR, "data")
+# DATA_DIR is overridable via ODYSSEUS_DATA_DIR for read-only installs (e.g.
+# Nix store, immutable containers). Falls back to "data" (cwd-relative), which
+# matches the project's other `Path("data/...")` literals — every relative
+# write resolves against the process's working directory.
+DATA_DIR = os.environ.get("ODYSSEUS_DATA_DIR", "data")
 
 # Data file paths
 SESSIONS_FILE = os.path.join(DATA_DIR, "sessions.json")

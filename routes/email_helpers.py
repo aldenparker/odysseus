@@ -257,7 +257,8 @@ def _cleanup_compose_uploads(tokens) -> None:
             pass
 
 
-DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+from core.constants import DATA_DIR as _DATA_DIR  # env-overridable via ODYSSEUS_DATA_DIR
+DATA_DIR = Path(_DATA_DIR)
 SETTINGS_FILE = DATA_DIR / "settings.json"
 # Override at deploy time via ODYSSEUS_MAIL_ATTACHMENTS_DIR. Defaults to a
 # subdir of the install's data/ tree so the app works out-of-the-box without

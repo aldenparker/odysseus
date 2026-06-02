@@ -2,14 +2,17 @@
 
 import hashlib
 import logging
+import os
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict
 
 logger = logging.getLogger(__name__)
 
-# Cache directories
-CACHE_DIR = Path(__file__).resolve().parent.parent / "cache"
+# Cache directories. Default to a cwd-relative "data/search" so writes land
+# in the same mutable tree as the rest of the app state; override with
+# ODYSSEUS_CACHE_DIR for non-standard installs.
+CACHE_DIR = Path(os.environ.get("ODYSSEUS_CACHE_DIR", "data/search"))
 SEARCH_CACHE_DIR = CACHE_DIR / "search"
 CONTENT_CACHE_DIR = CACHE_DIR / "content"
 CACHE_MAX_ENTRIES = 1000

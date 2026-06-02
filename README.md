@@ -80,6 +80,27 @@ Requirements: Python 3.11+. Cookbook also needs `tmux` for background model
 downloads and serves. Use `--host 0.0.0.0` only when you intentionally want
 LAN/reverse-proxy access.
 
+### NixOS
+A flake at the repo root exposes a package, a dev shell, and a NixOS module:
+
+```nix
+{
+  inputs.odysseus.url = "github:aldenparker/odysseus";
+  outputs = { self, nixpkgs, odysseus, ... }: {
+    nixosConfigurations.myhost = nixpkgs.lib.nixosSystem {
+      system = "x86_64-linux";
+      modules = [
+        odysseus.nixosModules.default
+        ({ ... }: { services.odysseus.enable = true; })
+      ];
+    };
+  };
+}
+```
+
+See [README.nix.md](README.nix.md) and `examples/minimal.nix` /
+`examples/full-stack.nix` for the rest.
+
 ### Apple Silicon
 Docker on macOS cannot use the Metal GPU. For GPU-accelerated Cookbook on an
 M-series Mac, run Odysseus natively:

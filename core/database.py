@@ -21,8 +21,11 @@ class TimestampMixin:
     def updated_at(cls):
         return Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
-# Get database URL from environment, default to SQLite
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./data/app.db")
+# Get database URL from environment, default to SQLite under the data dir.
+# DATA_DIR itself is overridable via ODYSSEUS_DATA_DIR; if not set it falls
+# back to a cwd-relative "data/app.db", matching the rest of the project.
+_default_data_dir = os.environ.get("ODYSSEUS_DATA_DIR", "data")
+DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{os.path.join(_default_data_dir, 'app.db')}")
 
 # Create engine
 engine = create_engine(

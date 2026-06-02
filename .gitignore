@@ -50,6 +50,10 @@ Thumbs.db
 cache/
 output.txt.txt
 
+# Nix build outputs
+result
+result-*
+
 # Media (uploaded/generated)
 *.jpg
 *.jpeg
