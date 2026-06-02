@@ -57,22 +57,26 @@ let
   cleanedSrc = lib.cleanSourceWith {
     src = lib.cleanSource appSrc;
     filter =
-      path: type:
+      path: _type:
       let
-        baseName = baseNameOf (toString path);
+        relPath = lib.removePrefix (toString appSrc + "/") (toString path);
+        baseName = baseNameOf relPath;
       in
-      !(builtins.elem baseName [
-        "data"
-        "logs"
-        "node_modules"
-        "result"
-        "__pycache__"
-        ".env"
-        ".venv"
-        "venv"
-      ])
-      && !(lib.hasSuffix ".pyc" baseName)
-      && !(lib.hasPrefix "result-" baseName);
+      # Exclude only TOP-LEVEL state dirs — sibling subdirs like
+      # services/hwfit/data/ ship the model catalog and must come along.
+      relPath != "data"
+      && !(lib.hasPrefix "data/" relPath)
+      && relPath != "logs"
+      && !(lib.hasPrefix "logs/" relPath)
+      && relPath != "node_modules"
+      && !(lib.hasPrefix "node_modules/" relPath)
+      && relPath != ".env"
+      && relPath != ".venv"
+      && relPath != "venv"
+      && !(lib.hasPrefix "result" relPath)
+      # Junk anywhere in the tree.
+      && baseName != "__pycache__"
+      && !(lib.hasSuffix ".pyc" relPath);
   };
 in
 stdenvNoCC.mkDerivation {
